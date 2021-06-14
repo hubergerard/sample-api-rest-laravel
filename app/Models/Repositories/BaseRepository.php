@@ -12,7 +12,7 @@ abstract class BaseRepository
         $this->model = $model;
     }
 
-    public function getAll() {
+    public function findAll() {
         return $this->model->all();
     }
 
@@ -20,7 +20,7 @@ abstract class BaseRepository
         return $this->model->find($id);
     }
 
-    public function getByIds($ids)
+    public function findByIds($ids)
     {
         if ($ids == null) {
             return array();
@@ -62,11 +62,11 @@ abstract class BaseRepository
         throw new \InvalidArgumentException("Arguments must be a model or an array with an ID");
     }
 
-    public function delete($ids) {
+    public function deleteByIds($ids) {
         return $this->model->destroy($ids);
     }
 
-    public function getCount() {
+    public function count() {
         return $this->model->count();
     }
 

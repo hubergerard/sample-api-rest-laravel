@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Mappers\ContactMapper;
+use App\Http\Dtos\CreateContactDto;
+use App\Http\Dtos\UpdateContactDto;
 use App\Services\ContactService;
 use Illuminate\Http\Request;
 use App\Models\Contact;
@@ -9,9 +12,12 @@ use App\Models\Contact;
 class ContactController extends Controller
 {
     private $contactService;
+    private $contactMapper;
 
-    public function __construct(ContactService $contactService) {
-        $this -> contactService = $contactService;
+    public function __construct(ContactService $contactService, ContactMapper $contactMapper)
+    {
+        $this->contactService = $contactService;
+        $this->contactMapper = $contactMapper;
     }
 
     /**
@@ -21,7 +27,7 @@ class ContactController extends Controller
      */
     public function index()
     {
-        $contacts = Contact::all();
+        $contacts = $this->contactService->findAll();
 
         return view('contacts.index', compact('contacts'));
     }
@@ -39,44 +45,37 @@ class ContactController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Http\Response|\Illuminate\Routing\Redirector
      */
     public function store(Request $request)
     {
         $request->validate([
-            'first_name'=>'required',
-            'last_name'=>'required',
-            'email'=>'required'
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'email' => 'required'
         ]);
 
-        $contact = new Contact([
-            'first_name' => $request->get('first_name'),
-            'last_name' => $request->get('last_name'),
-            'email' => $request->get('email'),
-            'job_title' => $request->get('job_title'),
-            'city' => $request->get('city'),
-            'country' => $request->get('country')
-        ]);
-        $contact->save();
+        $contactDto = $this->contactMapper->mapRequestToCreateContactDto($request);
+        $this->contactService->create($contactDto);
         return redirect('/contacts')->with('success', 'Contact saved!');
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
     {
-        return Contact::find($id);
+        return $this->contactService->findById($id);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View|\Illuminate\Http\Response
      */
     public function edit($id)
@@ -88,33 +87,33 @@ class ContactController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param \Illuminate\Http\Request $request
      * @param int $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Http\Response|\Illuminate\Routing\Redirector
      */
     public function update(Request $request, int $id)
     {
         $request->validate([
-            'first_name'=>'required',
-            'last_name'=>'required',
-            'email'=>'required'
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'email' => 'required'
         ]);
 
-        $this->contactService->update($request, $id);
+        $updateContactDto = $this->contactMapper->mapRequestToUpdateContactDto($request);
+        $this->contactService->update($updateContactDto, $id);
+
         return redirect('/contacts')->with('success', 'Contact updated!');
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param int $id
      * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Http\RedirectResponse|\Illuminate\Http\Response|\Illuminate\Routing\Redirector
      */
     public function destroy($id)
     {
-        $contact = Contact::find($id);
-        $contact->delete();
-
+        $this->contactService->deleteById($id);
         return redirect('/contacts')->with('success', 'Contact deleted!');
     }
 }
