@@ -50,6 +50,7 @@ class ContactService
             'city' => $dto->city,
             'country' => $dto->country
         ]);
+        echo $contact;
         $this->contactRepository->save($contact);
 
     }

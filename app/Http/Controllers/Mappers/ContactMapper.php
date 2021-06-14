@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Mappers;
 
 use App\Http\Dtos\CreateContactDto;
 use App\Http\Dtos\UpdateContactDto;
+use App\Models\Repositories\ContactRepository;
+use App\Services\ContactService;
 use Illuminate\Http\Request;
+use Mockery;
 
 class ContactMapper {
 
     public function mapRequestToCreateContactDto(Request $request) {
+
         $contactDto = new CreateContactDto();
         $contactDto->city = $request->get('city');
         $contactDto->lastName = $request->get('last_name');
